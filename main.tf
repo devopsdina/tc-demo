@@ -1,13 +1,20 @@
 terraform {
+    backend "remote" {
+    organization = "devopsdina"
+
+    workspaces {
+      prefix = "demo-dev-us-east"
+    }
+  }
 
    required_version = ">=1.0"
 
-#    required_providers {
-#      azurerm = {
-#        source = "hashicorp/azurerm"
-#        version = "~>2.0"
-#      }
-#    }
+   required_providers {
+     azurerm = {
+       source = "hashicorp/azurerm"
+       version = "~>2.0"
+     }
+   }
  }
 
 #  provider "azurerm" {
