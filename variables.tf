@@ -18,6 +18,6 @@ variable "ADMIN_USERNAME" {
   description = "vm username"
 }
 
-variable "ADMIN_PASSWWORD" {
+variable "ADMIN_PASSWORD" {
   description = "vm password"
 }
