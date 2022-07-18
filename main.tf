@@ -1,11 +1,11 @@
 terraform {
-    backend "remote" {
-    organization = "devopsdina"
+#     backend "remote" {
+#     organization = "devopsdina"
 
-    workspaces {
-      prefix = "demo-dev-us-east"
-    }
-  }
+#     workspaces {
+#       prefix = "demo-dev-us-east"
+#     }
+#   }
 
    required_version = ">=1.0"
 
@@ -17,12 +17,8 @@ terraform {
    }
  }
 
-#  provider "azurerm" {
-#    features {}
-#  }
-
  resource "azurerm_resource_group" "test" {
-   name     = "tc-demo"
+   name     = "tc-demo-2"
    location = "East US 2"
  }
 
@@ -143,8 +139,8 @@ terraform {
 
    os_profile {
      computer_name  = "hostname"
-     admin_username = "testadmin"
-     admin_password = "Password1234!"
+     admin_username = "${var.ADMIN_USERNAME}"
+     admin_password = "${var.ADMIN_PASSWORD}"
    }
 
    os_profile_linux_config {

@@ -3,13 +3,21 @@ variable "ARM_SUBSCRIPTION_ID" {
 }
 
 variable "ARM_CLIENT_ID" {
-  description = ""
+  description = "service principal client id"
 }
 
 variable "ARM_CLIENT_SECRET" {
-  description = ""
+  description = "service principal client secret"
 }
 
 variable "ARM_TENANT_ID" {
-  description = ""
+  description = "azure tenant id"
+}
+
+variable "ADMIN_USERNAME" {
+  description = "vm username"
+}
+
+variable "ADMIN_PASSWWORD" {
+  description = "vm password"
 }
