@@ -11,7 +11,7 @@ terraform {
 
 # Create a VPC
 resource "aws_vpc" "app_vpc" {
-  cidr_block = var.vpc_cidr
+  cidr_block = "10.0.0.0/16"
 
   tags = {
     Name = "app-vpc"
@@ -28,9 +28,9 @@ resource "aws_internet_gateway" "igw" {
 
 resource "aws_subnet" "public_subnet" {
   vpc_id            = aws_vpc.app_vpc.id
-  cidr_block        = var.public_subnet_cidr
+  cidr_block        = "10.0.2.0/24"
   map_public_ip_on_launch = true
-  availability_zone = "us-west-2a"
+  availability_zone = "us-east-1"
 
   tags = {
     Name = "public-subnet"
@@ -105,5 +105,5 @@ resource "aws_security_group" "websg" {
   }
 }
 output "instance_ips" {
-  value = aws_instance.tc-demo.public_ip
+  value = aws_instance.web.public_ip
 }
