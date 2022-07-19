@@ -1,12 +1,4 @@
 terraform {
-#     backend "remote" {
-#     organization = "devopsdina"
-
-#     workspaces {
-#       prefix = "demo-dev-us-east"
-#     }
-#   }
-
    required_version = ">=1.0"
 
    required_providers {
@@ -17,66 +9,66 @@ terraform {
    }
  }
 
- resource "azurerm_resource_group" "test" {
+ resource "azurerm_resource_group" "tc-demo" {
    name     = "tc-demo-2"
    location = "East US 2"
  }
 
- resource "azurerm_virtual_network" "test" {
+ resource "azurerm_virtual_network" "tc-demo" {
    name                = "acctvn"
    address_space       = ["10.0.0.0/16"]
-   location            = azurerm_resource_group.test.location
-   resource_group_name = azurerm_resource_group.test.name
+   location            = azurerm_resource_group.tc-demo.location
+   resource_group_name = azurerm_resource_group.tc-demo.name
  }
 
- resource "azurerm_subnet" "test" {
+ resource "azurerm_subnet" "tc-demo" {
    name                 = "acctsub"
-   resource_group_name  = azurerm_resource_group.test.name
-   virtual_network_name = azurerm_virtual_network.test.name
+   resource_group_name  = azurerm_resource_group.tc-demo.name
+   virtual_network_name = azurerm_virtual_network.tc-demo.name
    address_prefixes     = ["10.0.2.0/24"]
  }
 
- resource "azurerm_public_ip" "test" {
+ resource "azurerm_public_ip" "tc-demo" {
    name                         = "publicIPForLB"
-   location                     = azurerm_resource_group.test.location
-   resource_group_name          = azurerm_resource_group.test.name
+   location                     = azurerm_resource_group.tc-demo.location
+   resource_group_name          = azurerm_resource_group.tc-demo.name
    allocation_method            = "Static"
  }
 
- resource "azurerm_lb" "test" {
+ resource "azurerm_lb" "tc-demo" {
    name                = "loadBalancer"
-   location            = azurerm_resource_group.test.location
-   resource_group_name = azurerm_resource_group.test.name
+   location            = azurerm_resource_group.tc-demo.location
+   resource_group_name = azurerm_resource_group.tc-demo.name
 
    frontend_ip_configuration {
      name                 = "publicIPAddress"
-     public_ip_address_id = azurerm_public_ip.test.id
+     public_ip_address_id = azurerm_public_ip.tc-demo.id
    }
  }
 
- resource "azurerm_lb_backend_address_pool" "test" {
-   loadbalancer_id     = azurerm_lb.test.id
+ resource "azurerm_lb_backend_address_pool" "tc-demo" {
+   loadbalancer_id     = azurerm_lb.tc-demo.id
    name                = "BackEndAddressPool"
  }
 
- resource "azurerm_network_interface" "test" {
+ resource "azurerm_network_interface" "tc-demo" {
    count               = 2
    name                = "acctni${count.index}"
-   location            = azurerm_resource_group.test.location
-   resource_group_name = azurerm_resource_group.test.name
+   location            = azurerm_resource_group.tc-demo.location
+   resource_group_name = azurerm_resource_group.tc-demo.name
 
    ip_configuration {
-     name                          = "testConfiguration"
-     subnet_id                     = azurerm_subnet.test.id
+     name                          = "tc-demoConfiguration"
+     subnet_id                     = azurerm_subnet.tc-demo.id
      private_ip_address_allocation = "dynamic"
    }
  }
 
- resource "azurerm_managed_disk" "test" {
+ resource "azurerm_managed_disk" "tc-demo" {
    count                = 2
    name                 = "datadisk_existing_${count.index}"
-   location             = azurerm_resource_group.test.location
-   resource_group_name  = azurerm_resource_group.test.name
+   location             = azurerm_resource_group.tc-demo.location
+   resource_group_name  = azurerm_resource_group.tc-demo.name
    storage_account_type = "Standard_LRS"
    create_option        = "Empty"
    disk_size_gb         = "1023"
@@ -84,20 +76,20 @@ terraform {
 
  resource "azurerm_availability_set" "avset" {
    name                         = "avset"
-   location                     = azurerm_resource_group.test.location
-   resource_group_name          = azurerm_resource_group.test.name
+   location                     = azurerm_resource_group.tc-demo.location
+   resource_group_name          = azurerm_resource_group.tc-demo.name
    platform_fault_domain_count  = 2
    platform_update_domain_count = 2
    managed                      = true
  }
 
- resource "azurerm_virtual_machine" "test" {
+ resource "azurerm_virtual_machine" "tc-demo" {
    count                 = 2
    name                  = "acctvm${count.index}"
-   location              = azurerm_resource_group.test.location
+   location              = azurerm_resource_group.tc-demo.location
    availability_set_id   = azurerm_availability_set.avset.id
-   resource_group_name   = azurerm_resource_group.test.name
-   network_interface_ids = [element(azurerm_network_interface.test.*.id, count.index)]
+   resource_group_name   = azurerm_resource_group.tc-demo.name
+   network_interface_ids = [element(azurerm_network_interface.tc-demo.*.id, count.index)]
    vm_size               = "Standard_DS1_v2"
 
    # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -130,11 +122,11 @@ terraform {
    }
 
    storage_data_disk {
-     name            = element(azurerm_managed_disk.test.*.name, count.index)
-     managed_disk_id = element(azurerm_managed_disk.test.*.id, count.index)
+     name            = element(azurerm_managed_disk.tc-demo.*.name, count.index)
+     managed_disk_id = element(azurerm_managed_disk.tc-demo.*.id, count.index)
      create_option   = "Attach"
      lun             = 1
-     disk_size_gb    = element(azurerm_managed_disk.test.*.disk_size_gb, count.index)
+     disk_size_gb    = element(azurerm_managed_disk.tc-demo.*.disk_size_gb, count.index)
    }
 
    os_profile {
@@ -148,6 +140,6 @@ terraform {
    }
 
    tags = {
-     environment = "demo"
+     environment = "demo-dev-us-east"
    }
  }
