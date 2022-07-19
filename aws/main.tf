@@ -80,21 +80,6 @@ resource "aws_instance" "web" {
     Name = "web_instance"
   } 
 }
-
-
-# resource "aws_instance" "tc-demo" {
-#   ami = "ami-0070c5311b7677678" #ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220706
-#   instance_type = "t2.micro"
-#   vpc_security_group_ids = [ aws_security_group.websg.id ]
-#   user_data = <<-EOF
-#                 #!/bin/bash
-#                 echo "Hello from AWS! Terraform cloud demo!" > index.html
-#                 nohup busybox httpd -f -p 8080 &
-#                 EOF
-#     tags = {
-#       Name = "WEB-demo"
-#     }
-# }
 resource "aws_security_group" "websg" {
   name = "web-sg01"
   vpc_id = aws_vpc.app_vpc.id
