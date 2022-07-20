@@ -133,7 +133,7 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
       echo "Hello from Azure! Terraform cloud demo!" >> /var/www/html/index.html
       nohup busybox httpd -f -p 80 &
       sudo a2dissite 000-default.conf
-      service apache2 reload
+      sudo service apache2 reload
       EOF
     ]
     connection {
