@@ -7,7 +7,7 @@ on:
         description: 'The Terraform cloud organization that is associated with the secret token.'
         required: true
       GH_BRANCH:
-        description: 'Github Branch to associate with terraform cloud run. DEAFULT=MAIN'
+        description: 'Github Branch to associate with terraform cloud run.'
         required: true
         default: 'main'
 
@@ -17,31 +17,22 @@ jobs:
 
     steps:
       - name: "Checkout ${{ github.ref }}"
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
 
       - name: Get Github Org name
         shell: bash
         run: | 
-          echo ::set-env name=GH_ORGANIZATION::$(echo ${GITHUB_REPOSITORY%/*})
-      
-      - name: Echo Github org name
-        shell: bash
-        run: |
-          echo "$GH_ORGANIZATION"
+          echo "GH_ORGANIZATION=${GITHUB_REPOSITORY%/*}" >> $GITHUB_ENV
 
       - name: Get Github Repo name
         shell: bash
         run: |
-          echo ::set-env name=GH_REPO_NAME::$(echo $GITHUB_REPOSITORY" | awk -F / '{print $2}')
-      
-      - name: Echo Github Repo name
-        shell: bash
-        run: |
-          echo "$GH_REPO_NAME"
+          echo "GH_REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
 
       - name: Create Terraform Cloud workspace
         shell: bash
         run: |
-          ${GITHUB_WORKSPACE}/scripts/create-workspace.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} ${{ GH_REPO_NAME }} ${{ GH_ORGANIZATION }} ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
+          chmod +x ./scripts/create-workspaces.sh
+          ./scripts/create-workspaces.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} $GH_REPO_NAME $GH_ORGANIZATION ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
