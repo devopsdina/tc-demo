@@ -10,6 +10,9 @@ export ADMIN_PASSWORD=$9
 export AWS_ACCESS_KEY=${10}
 export AWS_SECRET_KEY=${11}
 
+# set to current working directory of this script
+cd "$(dirname "$0")"
+
 echo "This file contains sensitive output."
 echo "ALL curl calls in this file will only show if they error or fail"
 
