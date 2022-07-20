@@ -54,19 +54,19 @@ resource "azurerm_network_security_group" "tc-demo-sg" {
 
   security_rule {
     name                       = "HTTP"
-    priority                   = 100
+    priority                   = 120
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "80"
+    destination_port_range     = "8080"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
   security_rule {
     name                       = "SSH"
-    priority                   = 101
+    priority                   = 125
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -130,7 +130,7 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
       sudo apt update -y
       sudo apt install apache2 -y
       echo "*** Completed Installing apache2"
-      echo "Hello from Azure! Terraform cloud demo!" > index.html
+      echo "Hello from Azure! Terraform cloud demo!" > /var/www/html/index.html
       nohup busybox httpd -f -p 8080 &
       EOF
     ]
