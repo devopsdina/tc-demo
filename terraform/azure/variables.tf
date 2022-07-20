@@ -14,6 +14,11 @@ variable "ARM_TENANT_ID" {
   description = "azure tenant id"
 }
 
+variable "location" {
+  description = "The region where the resources are created"
+  default     = "East US 2"
+}
+
 variable "ADMIN_USERNAME" {
   description = "vm username"
 }

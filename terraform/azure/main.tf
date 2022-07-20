@@ -8,138 +8,142 @@ terraform {
      }
    }
  }
+#Create azure resource group
+resource "azurerm_resource_group" "tc-demo" {
+  name     = "tc-demo"
+  location = "${var.location}"
+}
 
- resource "azurerm_resource_group" "tc-demo" {
-   name     = "tc-demo-2"
-   location = "East US 2"
- }
+#Create azure storage account
+resource "azurerm_storage_account" "tc-demo-sa" {
+  name                     = "tc-demo-sa"
+  resource_group_name      = azurerm_resource_group.tc-demo.name
+  location                 = "${var.location}"
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+}
+#Create virtual network for the VM
+resource "azurerm_virtual_network" "tc-demo-vnet" {
+  name                = "tc-demo-vnet"
+  location            = "${var.location}"
+  address_space       = ["10.0.0.0/16"]
+  resource_group_name = azurerm_resource_group.tc-demo.name
+}
 
- resource "azurerm_virtual_network" "tc-demo" {
-   name                = "acctvn"
-   address_space       = ["10.0.0.0/16"]
-   location            = azurerm_resource_group.tc-demo.location
-   resource_group_name = azurerm_resource_group.tc-demo.name
- }
+#Create subnet to the virtual network
+resource "azurerm_subnet" "subnet" {
+  name                 = "tc-demo-subnet"
+  virtual_network_name = azurerm_virtual_network.tc-demo-vnet.name
+  resource_group_name  = azurerm_resource_group.tc-demo.name
+  address_prefixes     = ["10.0.2.0/24"]
+}
 
- resource "azurerm_subnet" "tc-demo" {
-   name                 = "acctsub"
-   resource_group_name  = azurerm_resource_group.tc-demo.name
-   virtual_network_name = azurerm_virtual_network.tc-demo.name
-   address_prefixes     = ["10.0.2.0/24"]
- }
+#Create public ip
+resource "azurerm_public_ip" "tc-demo-pip" {
+  name                = "tc-demo-pip"
+  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.tc-demo.name
+  allocation_method   = "Static"
+}
 
- resource "azurerm_public_ip" "tc-demo" {
-   name                         = "publicIPForLB"
-   location                     = azurerm_resource_group.tc-demo.location
-   resource_group_name          = azurerm_resource_group.tc-demo.name
-   allocation_method            = "Static"
- }
+#Create Network security group
+resource "azurerm_network_security_group" "tc-demo-sg" {
+  name                = "tc-demo-sg"
+  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.tc-demo.name
 
- resource "azurerm_lb" "tc-demo" {
-   name                = "loadBalancer"
-   location            = azurerm_resource_group.tc-demo.location
-   resource_group_name = azurerm_resource_group.tc-demo.name
+  security_rule {
+    name                       = "HTTP"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 
-   frontend_ip_configuration {
-     name                 = "publicIPAddress"
-     public_ip_address_id = azurerm_public_ip.tc-demo.id
-   }
- }
+  security_rule {
+    name                       = "SSH"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
 
- resource "azurerm_lb_backend_address_pool" "tc-demo" {
-   loadbalancer_id     = azurerm_lb.tc-demo.id
-   name                = "BackEndAddressPool"
- }
+#Create Network interface
+resource "azurerm_network_interface" "tc-demo-nic" {
+  name                = "tc-demo-nic"
+  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.tc-demo.name
 
- resource "azurerm_network_interface" "tc-demo" {
-   count               = 2
-   name                = "acctni${count.index}"
-   location            = azurerm_resource_group.tc-demo.location
-   resource_group_name = azurerm_resource_group.tc-demo.name
+  ip_configuration {
+    name                          = "tc-demo-ipconfig"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.tc-demo-pip.id
+  }
+}
 
-   ip_configuration {
-     name                          = "tc-demoConfiguration"
-     subnet_id                     = azurerm_subnet.tc-demo.id
-     private_ip_address_allocation = "dynamic"
-   }
- }
+#Create VM
 
- resource "azurerm_managed_disk" "tc-demo" {
-   count                = 2
-   name                 = "datadisk_existing_${count.index}"
-   location             = azurerm_resource_group.tc-demo.location
-   resource_group_name  = azurerm_resource_group.tc-demo.name
-   storage_account_type = "Standard_LRS"
-   create_option        = "Empty"
-   disk_size_gb         = "1023"
- }
+resource "azurerm_virtual_machine" "tc-demo-site" {
+  name                = "tc-demo-site"
+  location            = "${var.location}"
+  resource_group_name = azurerm_resource_group.tc-demo.name
+  vm_size             = "Standard_DS1_v2"
 
- resource "azurerm_availability_set" "avset" {
-   name                         = "avset"
-   location                     = azurerm_resource_group.tc-demo.location
-   resource_group_name          = azurerm_resource_group.tc-demo.name
-   platform_fault_domain_count  = 2
-   platform_update_domain_count = 2
-   managed                      = true
- }
+  network_interface_ids         = ["${azurerm_network_interface.tc-demo-nic.id}"]
+  delete_os_disk_on_termination = "true"
 
- resource "azurerm_virtual_machine" "tc-demo" {
-   count                 = 2
-   name                  = "acctvm${count.index}"
-   location              = azurerm_resource_group.tc-demo.location
-   availability_set_id   = azurerm_availability_set.avset.id
-   resource_group_name   = azurerm_resource_group.tc-demo.name
-   network_interface_ids = [element(azurerm_network_interface.tc-demo.*.id, count.index)]
-   vm_size               = "Standard_DS1_v2"
-
-   # Uncomment this line to delete the OS disk automatically when deleting the VM
-   # delete_os_disk_on_termination = true
-
-   # Uncomment this line to delete the data disks automatically when deleting the VM
-   # delete_data_disks_on_termination = true
-
-   storage_image_reference {
+  storage_image_reference {
      publisher = "Canonical"
      offer     = "UbuntuServer"
      sku       = "16.04-LTS"
      version   = "latest"
-   }
+  }
 
-   storage_os_disk {
-     name              = "myosdisk${count.index}"
-     caching           = "ReadWrite"
-     create_option     = "FromImage"
-     managed_disk_type = "Standard_LRS"
-   }
+  storage_os_disk {
+    name              = "tc-demo-osdisk"
+    managed_disk_type = "Standard_LRS"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+  }
 
-   # Optional data disks
-   storage_data_disk {
-     name              = "datadisk_new_${count.index}"
-     managed_disk_type = "Standard_LRS"
-     create_option     = "Empty"
-     lun               = 0
-     disk_size_gb      = "1023"
-   }
+  os_profile {
+    computer_name  = "tc-demo"
+    admin_username = "${var.ADMIN_USERNAME}"
+    admin_password = "${var.ADMIN_PASSWORD}"
+  }
 
-   storage_data_disk {
-     name            = element(azurerm_managed_disk.tc-demo.*.name, count.index)
-     managed_disk_id = element(azurerm_managed_disk.tc-demo.*.id, count.index)
-     create_option   = "Attach"
-     lun             = 1
-     disk_size_gb    = element(azurerm_managed_disk.tc-demo.*.disk_size_gb, count.index)
-   }
+  os_profile_linux_config {
+    disable_password_authentication = true
+    ssh_keys {
+      path     = "/home/${var.ADMIN_USERNAME}/.ssh/authorized_keys"
+      key_data = file("~/.ssh/id_rsa.pub")
+    }
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo yum -y install httpd && sudo systemctl start httpd",
+      "echo '<h1><center>Hello from Azure! Terraform cloud demo!</center></h1>' > index.html",
+      "sudo mv index.html /var/www/html/"
+    ]
+    connection {
+      type        = "ssh"
+      host        = azurerm_public_ip.tc-demo-pip.fqdn
+      user        = "${var.ADMIN_USERNAME}"
+      private_key = file("~/.ssh/id_rsa")
+    }
+  }
 
-   os_profile {
-     computer_name  = "hostname"
-     admin_username = "${var.ADMIN_USERNAME}"
-     admin_password = "${var.ADMIN_PASSWORD}"
-   }
-
-   os_profile_linux_config {
-     disable_password_authentication = false
-   }
-
-   tags = {
-     environment = "demo-dev-us-east"
-   }
- }
+  output "instance_ips" {
+  value = data.azurerm_public_ip.tc-demo-pip.ip_address
+}
+}
