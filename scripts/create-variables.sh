@@ -62,7 +62,7 @@ cat <<-EOF > /tmp/create-variable-clientsecret.json
         "description":"azure client secret for demo",
         "category":"terraform",
         "hcl":false,
-        "sensitive":false
+        "sensitive":true
         }
     }
     }
@@ -150,7 +150,7 @@ cat <<-EOF > /tmp/create-variable-pw.json
         "description":"azure vm password for demo",
         "category":"terraform",
         "hcl":false,
-        "sensitive":false
+        "sensitive":true
         }
     }
     }
@@ -205,7 +205,7 @@ cat <<-EOF > /tmp/create-variable-awsid.json
         "description":"aws secret key for demo",
         "category":"terraform",
         "hcl":false,
-        "sensitive":false
+        "sensitive":true
         }
     }
     }
