@@ -34,9 +34,8 @@ jobs:
       - name: Get Github Repo name
         shell: bash
         run: |
-          echo "GH_REPO_NAME=$GITHUB_REPOSITORY | awk -F / '{print $2}'" >> $GITHUB_ENV
-          # echo ::set-env name=GH_REPO_NAME::$(echo $GITHUB_REPOSITORY" | awk -F / '{print $2}')
-      
+          echo "GH_REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
+
       - name: Echo Github Repo name
         shell: bash
         run: |
