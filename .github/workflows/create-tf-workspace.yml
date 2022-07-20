@@ -7,7 +7,7 @@ on:
         description: 'The Terraform cloud organization that is associated with the secret token.'
         required: true
       GH_BRANCH:
-        description: 'Github Branch to associate with terraform cloud run. DEAFULT=MAIN'
+        description: 'Github Branch to associate with terraform cloud run.'
         required: true
         default: 'main'
 
@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: "Checkout ${{ github.ref }}"
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
 
@@ -25,21 +25,11 @@ jobs:
         shell: bash
         run: | 
           echo "GH_ORGANIZATION=${GITHUB_REPOSITORY%/*}" >> $GITHUB_ENV
-      
-      - name: Echo Github org name
-        shell: bash
-        run: |
-          echo "$GH_ORGANIZATION"
 
       - name: Get Github Repo name
         shell: bash
         run: |
           echo "GH_REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
-
-      - name: Echo Github Repo name
-        shell: bash
-        run: |
-          echo "$GH_REPO_NAME"
 
       - name: Create Terraform Cloud workspace
         shell: bash
