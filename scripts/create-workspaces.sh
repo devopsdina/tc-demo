@@ -14,6 +14,9 @@ echo "TF_organization branch is: $TF_organization"
 echo "TF_svnrepo branch is: $TF_svnrepo"
 #
 
+# set to current working directory of this script
+cd "$(dirname "$0")"
+
 for i in $(find ./../terraform/ -maxdepth 1 -type d | cut -d/ -f5)
 do
     export TF_workspace="$i-$GH_REPO_NAME-automation"
@@ -45,6 +48,4 @@ EOF
     --request POST \
     --data @/tmp/create-workspace.json https://app.terraform.io/api/v2/organizations/$TF_organization/workspaces | jq .
 
-    # Create the variables we need for terraform, pass the workspace name
-    #source ./create-variables.sh $TF_workspace
 done
