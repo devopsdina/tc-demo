@@ -91,13 +91,6 @@ resource "azurerm_network_interface" "tc-demo-nic" {
   }
 }
 
-resource "azurerm_ssh_public_key" "tc-demo-ssh-key" {
-  name                = "tc-demo-ssh-key"
-  resource_group_name = "tc-demo"
-  location            = "${var.location}"
-  public_key          = file("~/.ssh/id_rsa.pub")
-}
-
 resource "azurerm_virtual_machine" "tc-demo-site" {
   name                = "tc-demo-site"
   location            = "${var.location}"
@@ -129,10 +122,6 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
 
   os_profile_linux_config {
     disable_password_authentication = false
-    ssh_keys {
-      path     = "/home/${var.ADMIN_USERNAME}/.ssh/authorized_keys"
-      key_data = file("~/.ssh/id_rsa.pub")
-    }
   }
   provisioner "remote-exec" {
     inline = [
