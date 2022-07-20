@@ -24,24 +24,25 @@ jobs:
       - name: Get Github Org name
         shell: bash
         run: | 
-          echo ::set-env name=GH_ORGANIZATION::$(echo ${GITHUB_REPOSITORY%/*})
+          echo "GH_ORGANIZATION=${GITHUB_REPOSITORY%/*}" >> $GITHUB_ENV
+          # echo ::set-env name=GH_ORGANIZATION::$(echo ${GITHUB_REPOSITORY%/*})
       
       - name: Echo Github org name
         shell: bash
         run: |
           echo "$GH_ORGANIZATION"
 
-      - name: Get Github Repo name
-        shell: bash
-        run: |
-          echo ::set-env name=GH_REPO_NAME::$(echo $GITHUB_REPOSITORY" | awk -F / '{print $2}')
+      # - name: Get Github Repo name
+      #   shell: bash
+      #   run: |
+      #     echo ::set-env name=GH_REPO_NAME::$(echo $GITHUB_REPOSITORY" | awk -F / '{print $2}')
       
-      - name: Echo Github Repo name
-        shell: bash
-        run: |
-          echo "$GH_REPO_NAME"
+      # - name: Echo Github Repo name
+      #   shell: bash
+      #   run: |
+      #     echo "$GH_REPO_NAME"
 
-      - name: Create Terraform Cloud workspace
-        shell: bash
-        run: |
-          ${GITHUB_WORKSPACE}/scripts/create-workspace.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} $GH_REPO_NAME $GH_ORGANIZATION ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
+      # - name: Create Terraform Cloud workspace
+      #   shell: bash
+      #   run: |
+      #     ${GITHUB_WORKSPACE}/scripts/create-workspace.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} $GH_REPO_NAME $GH_ORGANIZATION ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
