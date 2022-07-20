@@ -15,7 +15,7 @@ resource "azurerm_resource_group" "tc-demo" {
 }
 
 #Create azure storage account
-resource "azurerm_storage_account" "tc-demo-sa" {
+resource "azurerm_storage_account" "tcdemosa" {
   name                     = "tcdemosa"
   resource_group_name      = azurerm_resource_group.tc-demo.name
   location                 = "${var.location}"
@@ -59,7 +59,7 @@ resource "azurerm_network_security_group" "tc-demo-sg" {
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "8080"
+    destination_port_range     = "80"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -130,8 +130,8 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
       sudo apt update -y
       sudo apt install apache2 -y
       echo "*** Completed Installing apache2"
-      echo "Hello from Azure! Terraform cloud demo!" > /var/www/html/index.html
-      nohup busybox httpd -f -p 8080 &
+      echo "Hello from Azure! Terraform cloud demo!" >> /var/www/html/index.html
+      nohup busybox httpd -f -p 80 &
       EOF
     ]
     connection {
