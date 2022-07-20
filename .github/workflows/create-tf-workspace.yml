@@ -34,5 +34,5 @@ jobs:
       - name: Create Terraform Cloud workspace
         shell: bash
         run: |
-          chmod +x ./scripts/create-workspace.sh
-          ./scripts/create-workspace.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} $GH_REPO_NAME $GH_ORGANIZATION ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
+          chmod +x ./scripts/create-workspaces.sh
+          ./scripts/create-workspaces.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} $GH_REPO_NAME $GH_ORGANIZATION ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
