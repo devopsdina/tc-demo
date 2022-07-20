@@ -124,10 +124,15 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
     disable_password_authentication = false
   }
   provisioner "remote-exec" {
-    inline = [
-      "sudo yum -y install httpd && sudo systemctl start httpd",
-      "echo '<h1><center>Hello from Azure! Terraform cloud demo!</center></h1>' > index.html",
-      "sudo mv index.html /var/www/html/"
+    inline = [ <<-EOF
+      #!/bin/bash
+      echo "*** Installing apache2"
+      sudo apt update -y
+      sudo apt install apache2 -y
+      echo "*** Completed Installing apache2"
+      echo "Hello from Azure! Terraform cloud demo!" > index.html
+      nohup busybox httpd -f -p 8080 &
+      EOF
     ]
     connection {
       type        = "ssh"
