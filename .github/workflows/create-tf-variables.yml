@@ -23,5 +23,6 @@ jobs:
       - name: Create Terraform Cloud variables
         shell: bash
         run: |
+          chmod +x ./scripts/create-variables.sh
           ${GITHUB_WORKSPACE}/scripts/create-variables.sh ${{ secrets.TOKEN }} 
           ${{ github.event.inputs.TF_workspace }} ${{ github.event.inputs.TF_organization }} ${{ secrets.ARM_CLIENT_ID }} ${{ secrets.ARM_CLIENT_SECRET }} ${{ secrets.ARM_SUBSCRIPTION_ID }} ${{ secrets.ARM_TENANT_ID }} ${{ secrets.ADMIN_USERNAME }} ${{ secrets.ADMIN_PASSWORD }} ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }}

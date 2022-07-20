@@ -6,14 +6,6 @@ export GH_BRANCH=$5 # should be main
 export TF_organization=$6 # should be devopsdina
 export TF_svnrepo="${GH_ORGANIZATION}/${GH_REPO_NAME}"
 
-# echo non senseitive values to make sure they are set...
-echo "github reponame is: $GH_REPO_NAME"
-echo "github org is: $GH_ORGANIZATION"
-echo "github branch is: $GH_BRANCH"
-echo "TF_organization branch is: $TF_organization"
-echo "TF_svnrepo branch is: $TF_svnrepo"
-#
-
 # set to current working directory of this script
 cd "$(dirname "$0")"
 
