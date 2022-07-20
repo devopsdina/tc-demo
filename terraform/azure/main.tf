@@ -16,7 +16,7 @@ resource "azurerm_resource_group" "tc-demo" {
 
 #Create azure storage account
 resource "azurerm_storage_account" "tc-demo-sa" {
-  name                     = "tc-demo-sa"
+  name                     = "tcdemosa"
   resource_group_name      = azurerm_resource_group.tc-demo.name
   location                 = "${var.location}"
   account_tier             = "Standard"
@@ -91,7 +91,12 @@ resource "azurerm_network_interface" "tc-demo-nic" {
   }
 }
 
-#Create VM
+resource "azurerm_ssh_public_key" "tc-demo-ssh-key" {
+  name                = "tc-demo-ssh-key"
+  resource_group_name = "tc-demo"
+  location            = "${var.location}"
+  public_key          = file("~/.ssh/id_rsa.pub")
+}
 
 resource "azurerm_virtual_machine" "tc-demo-site" {
   name                = "tc-demo-site"
@@ -123,7 +128,7 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
   }
 
   os_profile_linux_config {
-    disable_password_authentication = true
+    disable_password_authentication = false
     ssh_keys {
       path     = "/home/${var.ADMIN_USERNAME}/.ssh/authorized_keys"
       key_data = file("~/.ssh/id_rsa.pub")
@@ -139,11 +144,11 @@ resource "azurerm_virtual_machine" "tc-demo-site" {
       type        = "ssh"
       host        = azurerm_public_ip.tc-demo-pip.fqdn
       user        = "${var.ADMIN_USERNAME}"
-      private_key = file("~/.ssh/id_rsa")
+      password    = "${var.ADMIN_PASSWORD}"
     }
   }
-
-  output "instance_ips" {
-  value = data.azurerm_public_ip.tc-demo-pip.ip_address
 }
+
+output "instance_ips" {
+  value = azurerm_public_ip.tc-demo-pip.ip_address
 }
