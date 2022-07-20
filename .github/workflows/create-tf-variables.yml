@@ -1,0 +1,27 @@
+name: create-tf-variables
+
+on:
+  workflow_dispatch:
+    inputs:
+      TF_organization:
+        description: 'The Terraform cloud organization that is associated with the secret token.'
+        required: true
+      TF_workspace:
+        description: 'The Terraform cloud workspace that is associated with the organization.'
+        required: true
+
+jobs:
+  create-tf-variables:
+    runs-on: macos-latest
+
+    steps:
+      - name: "Checkout ${{ github.ref }}"
+        uses: actions/checkout@main
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Create Terraform Cloud variables
+        shell: bash
+        run: |
+          ${GITHUB_WORKSPACE}/scripts/create-variables.sh ${{ secrets.TOKEN }} 
+          ${{ github.event.inputs.TF_workspace }} ${{ github.event.inputs.TF_organization }} ${{ secrets.ARM_CLIENT_ID }} ${{ secrets.ARM_CLIENT_SECRET }} ${{ secrets.ARM_SUBSCRIPTION_ID }} ${{ secrets.ARM_TENANT_ID }} ${{ secrets.ADMIN_USERNAME }} ${{ secrets.ADMIN_PASSWORD }} ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }}

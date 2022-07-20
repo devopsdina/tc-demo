@@ -1,0 +1,47 @@
+name: create-tf-workspace
+
+on:
+  workflow_dispatch:
+    inputs:
+      TF_organization:
+        description: 'The Terraform cloud organization that is associated with the secret token.'
+        required: true
+      GH_BRANCH:
+        description: 'Github Branch to associate with terraform cloud run. DEAFULT=MAIN'
+        required: true
+        default: 'main'
+
+jobs:
+  create-tf-workspace:
+    runs-on: macos-latest
+
+    steps:
+      - name: "Checkout ${{ github.ref }}"
+        uses: actions/checkout@main
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Get Github Org name
+        shell: bash
+        run: | 
+          echo ::set-env name=GH_ORGANIZATION::$(echo ${GITHUB_REPOSITORY%/*})
+      
+      - name: Echo Github org name
+        shell: bash
+        run: |
+          echo "$GH_ORGANIZATION"
+
+      - name: Get Github Repo name
+        shell: bash
+        run: |
+          echo ::set-env name=GH_REPO_NAME::$(echo $GITHUB_REPOSITORY" | awk -F / '{print $2}')
+      
+      - name: Echo Github Repo name
+        shell: bash
+        run: |
+          echo "$GH_REPO_NAME"
+
+      - name: Create Terraform Cloud workspace
+        shell: bash
+        run: |
+          ${GITHUB_WORKSPACE}/scripts/create-workspace.sh ${{ secrets.TOKEN }} ${{ secrets.OAUTH_TOKEN_ID }} ${{ GH_REPO_NAME }} ${{ GH_ORGANIZATION }} ${{ github.event.inputs.GH_BRANCH }} ${{ github.event.inputs.TF_organization }}
